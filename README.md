@@ -1,41 +1,28 @@
-# Cross-Market Variable Transferability: A Multi-Country Validation and Two-Dimensional Extension
+# Cross-Market Variable Transferability — Multi-Country Validation and Two-Dimensional Extension
 
-> **Anonymous repository for double-blind peer review.**
-> All author, institutional, and identifying information has been removed.
-> Please do not attempt to de-anonymize the authors.
+Analysis code and results for a study that extends the Cross-Market Variable
+Transferability Score (CMVTS) — a pre-entry framework for judging whether
+alternative credit-scoring variables developed in one market can be deployed in
+another — from a single market pair to nine Asian target markets.
 
-This repository contains the analysis code, derived data references, and figures
-for an extension study of the Cross-Market Variable Transferability Score (CMVTS).
-The study validates the transferability framework across nine Asian target markets
-using real demand-side microdata, breaks the circularity of the original
-single-pair design by using an independent outcome measure, and extends the
-one-dimensional transfer tier into a two-dimensional decision framework.
+The study makes four contributions:
 
----
-
-## Overview
-
-The original CMVTS framework assessed whether alternative credit-scoring variables
-developed in a source market can be transferred to a target market **before** any
-target-market data are collected, using a composite of distributional, rank-order,
-and structural similarity measures. That framework rested on a single, structurally
-comparable market pair, leaving open whether its verdict reflected genuine market
-similarity or favourable pair selection.
-
-This extension addresses that gap in four ways:
-
-1. **Multi-country validation.** The macro-structural predictor is computed for a
-   source market against nine target markets and correlated with an independently
-   measured outcome (realized behavioural divergence from demand-side microdata).
-2. **Circularity break.** The predictor and the outcome are drawn from disjoint
-   variable groups and different data sources, so the validation does not reuse the
-   same inputs on both sides.
-3. **Component re-derivation.** The rank-order component is redefined on a
-   cross-country basis after the original within-pair formulation is shown to be
-   unstable when the source market is extremal on most indicators.
+1. **Multi-country validation.** The macro predictor is computed for a source
+   market (Republic of Korea) against nine target markets and correlated with an
+   independently measured outcome.
+2. **Circularity-free design.** The predictor and the outcome are **disjoint by
+   data source**: the predictor uses only infrastructure and macroeconomic
+   indicators from the World Bank WDI, while the outcome is measured from a separate
+   demand-side survey (Global Findex). The predictor is shown to anticipate the
+   behavioural-activity **penetration gap** between markets — the first-order
+   constraint on a transferred card-based scorecard — rather than realised transfer
+   performance.
+3. **Corrected rank-order component.** The original rank-order component is unstable
+   when the source market is extremal on most indicators; it is redefined on a
+   cross-country basis.
 4. **Two-dimensional decision framework.** Transferability and local absorptive
-   capacity (bank-sector efficiency) are shown to be independent axes; the original
-   one-dimensional tier is extended into a four-quadrant decision grid.
+   capacity (bank-sector efficiency) are shown to be independent axes, extending the
+   one-dimensional transfer tier into a four-quadrant decision grid.
 
 ---
 
@@ -43,97 +30,74 @@ This extension addresses that gap in four ways:
 
 ```
 .
-├── data/                # input data references and small derived tables
-├── notebooks/           # analysis notebooks (numbered by execution order)
+├── data/                       raw data (NOT redistributed — see data/README.txt)
+├── notebooks/                  analysis scripts, numbered by execution order
 ├── results/
-│   ├── figures/         # generated figures (PNG + PDF, 600 dpi, greyscale)
-│   └── tables/          # generated result tables (CSV)
+│   ├── figures/                generated figures (PNG + PDF, 600 dpi, greyscale)
+│   └── tables/                 result tables (CSV) and the IMF FDI label
+├── requirements.txt
 └── README.md
 ```
-
-> **Note on data.** Large primary datasets are **not** redistributed in this
-> repository because of source licensing and size. `data/` holds only small derived
-> lookup tables and pointers to the public sources below. See **Data access**.
 
 ---
 
 ## Notebooks
 
-Notebooks are numbered by execution order. Earlier notebooks (01–02) are exploratory
-and document methodological pitfalls that motivated the final design; the settled
-pipeline begins at 03.
+Run in order from the `notebooks/` folder. Scripts read raw data from `../data/`
+and derived CSVs from `../results/`, and write outputs to `../results/tables/` and
+`../results/figures/`.
 
-| # | Notebook | Purpose |
-|---|----------|---------|
-| 01 | predictor–outcome pilot | First predictor–outcome check; surfaces a source-distribution contamination pitfall. |
-| 02 | source-distribution construction | Builds the source behavioural distribution; identifies a binning artifact. |
-| 03 | outcome robustness | Confirms the outcome is invariant to distribution construction (rank cross-check). |
-| 04 | macro-indicator extraction | Pulls open macro indicators (nine countries × two vintages). |
-| 05 | macro components C2/C3 | Computes the redefined rank-order and cosine components (normalization-corrected). |
-| 06 | component diagnosis | Diagnoses and fixes the rank-order component; motivates the cross-country redefinition. |
-| 07 | macro-CMVTS validation | Headline predictor–outcome validation, weight insensitivity, vintage sensitivity. |
-| 08 | two-dimensional framework | Independent-label check, four-quadrant grid, placement sensitivity, figures. |
-| 09 | figures (spectrum, validation) | Generates the penetration-spectrum and predictor–outcome figures. |
-| 10 | figures (weights, vintage) | Generates the weight-insensitivity and vintage-stability figures. |
+| Script | Purpose |
+|--------|---------|
+| `01_source_scorecard_and_outcome.py` | Build the Korean source behavioural distribution (from credit-bureau records) and the realized-divergence **outcome** from Findex card-activity penetration. |
+| `02_wdi_extraction.py` | Fetch the **predictor** indicators (WDI infrastructure + macro scale only) from the World Bank API for two vintages. |
+| `03_cmvts_components.py` | Compute the macro predictor: `C2` (cross-country rank), `C3` (cosine), and equal-weight `macro-CMVTS`. |
+| `04_validation.py` | Headline predictor–outcome association, leave-one-out, and weight-insensitivity checks. |
+| `05_two_dimensional_framework.py` | FIE independence check, quadrant assignment, and jitter stability. |
+| `06_figures.py` | Regenerate figures from the result tables. |
 
-**Reproducibility notes.** Notebook 05 supersedes an earlier buggy version in which
-a min–max normalization broke rank order; the current notebook computes the
-rank-order component on raw values. The threshold-calibration analysis originally
-attempted a one-dimensional ROC calibration; it was superseded by the
-two-dimensional framework in notebook 08 after the outcome label was found to be
-independent of the transferability axis.
+**Circularity note.** The predictor (`02`/`03`) draws only on WDI infrastructure and
+macro-scale indicators; the outcome (`01`) draws only on the Findex survey. No
+variable and no data source is shared between them. This is the design that makes
+the validation free of the circularity discussed in the paper.
 
 ---
 
-## Results
+## Key results (WDI-only predictor)
 
-Generated artifacts are written to `results/`.
+| Quantity | Value |
+|----------|-------|
+| Predictor–outcome association (equal weight) | Spearman **−0.73** (p = 0.025) |
+| Cosine component alone (`C3`) | Spearman −0.88 |
+| Leave-one-out range | −0.64 to −0.83 |
+| Weight-grid range | −0.73 to −0.88 (always significant) |
+| FIE label independence | Spearman **+0.30** (p = 0.43; weak, non-significant) |
+| Vintage stability (mean abs. shift) | 0.025 |
 
-**Figures** (`results/figures/`, PNG + PDF, 600 dpi, greyscale, legends at bottom):
+**Two-dimensional quadrants** (median split): Q1 direct transfer — Thailand, Viet Nam,
+Philippines; Q3 transfer with monitoring — Indonesia, Cambodia; Q2 redevelop on
+functioning base — Bangladesh, Pakistan; Q4 local redevelopment — Nepal, Lao PDR.
+Indonesia (the target of the original single-pair study) moves from an unqualified
+high-transferability verdict to transfer-with-monitoring.
 
-| File | Content |
-|------|---------|
-| `fig_5_1_penetration_spectrum` | Target-market proxy-penetration spectrum across nine countries. |
-| `fig_5_2_predictor_outcome` | Macro-CMVTS vs realized behavioural divergence (headline validation). |
-| `fig_5_2b_outcome_vs_penetration` | Outcome vs card-activity penetration (illustrates the penetration-driven outcome). |
-| `fig_5_4_weight_insensitivity` | Predictor–outcome correlation across macro weight combinations. |
-| `fig_5_5_vintage_stability` | Macro-CMVTS at two indicator vintages per country. |
-| `fig_2d_decision_grid` | Two-dimensional transferability × absorptive-capacity decision grid. |
-| `fig_label_independence` | Independence of the efficiency label from the transferability axis. |
-| `fig_sensitivity_fliprate` | Quadrant-placement stability under split-rule variation and jitter. |
-
-**Tables** (`results/tables/`, CSV):
-
-| File | Content |
-|------|---------|
-| `wdi_macro_2021`, `wdi_macro_latest` | Macro-indicator matrices by vintage. |
-| `cmvts_C2C3_2021`, `cmvts_C2C3_latest` | Rank-order and cosine components by vintage. |
-| `macro_cmvts_headline` | Headline macro-CMVTS and outcome per country. |
-| `cmvts_2d_grid` | Two-dimensional grid coordinates and quadrant assignments. |
-| `imf_fdi_label` | Financial-development sub-indices used as the absorptive-capacity label. |
+Result tables are in `results/tables/`:
+`outcome_realized_divergence.csv`, `cmvts_components.csv`,
+`two_dimensional_grid.csv`, `imf_fdi_label.csv`.
 
 ---
 
 ## Data access
 
-All primary data come from public sources. None are redistributed here; obtain them
-directly and place them under `data/` (or adjust the path constants at the top of
-each notebook).
+Raw data are not redistributed here (licensing and size). See `data/README.txt`.
 
-- **Source-market credit bureau microdata** — a synthetic personal credit-bureau
-  dataset from a national open-data platform. Registration/login required on the
-  provider's portal.
-- **Target-market demand-side microdata** — a cross-country financial-inclusion
-  survey (2024 collection wave), individual-level labelled CSV. Available from the
-  publisher's microdata catalog after free registration.
-- **Macro indicators** — a public development-indicators database, retrieved via its
-  open API (no key required). The extraction notebook queries it directly.
-- **Financial-development sub-indices** — a public financial-development index
-  dataset from an international financial institution, downloadable as CSV.
-
-Exact indicator codes, the predictor/outcome variable separation, and the mapping
-from source-market scorecard variables to survey proxies are documented in the
-notebooks and in the indicator-design note included with the analysis.
+- **Findex 2025 microdata** (2024 wave) — World Bank Global Findex microdata
+  catalog, free registration.
+- **Korean synthetic personal credit-bureau data** — AI-Hub open-data platform
+  (`dataSetSn = 71792`), login required.
+- **WDI indicators** — World Bank open API, fetched by `02_wdi_extraction.py`
+  (no key needed).
+- **IMF Financial Development Index** — public CSV from the IMF; the derived
+  `FIE` label is included at `results/tables/imf_fdi_label.csv`.
 
 ---
 
@@ -141,55 +105,26 @@ notebooks and in the indicator-design note included with the analysis.
 
 ```
 python >= 3.10
-numpy
-pandas
-scipy
-matplotlib
-seaborn
+numpy, pandas, scipy, matplotlib, seaborn
 ```
 
-Install with:
-
 ```bash
-pip install numpy pandas scipy matplotlib seaborn
+pip install -r requirements.txt
 ```
 
 ---
 
 ## Reproduction
 
-1. Obtain the primary datasets (see **Data access**) and place them under `data/`,
-   updating the path constants at the top of each notebook if needed.
-2. Run the notebooks in order. `04` requires network access to the public
-   development-indicators API; all other notebooks run offline once the input files
-   are present.
-3. Figures and tables are written to `results/figures/` and `results/tables/`.
-
-Notebooks 01–02 are not required for the final results; they are retained to
-document the methodological decisions. The minimal path to the headline results is
-`03 → 04 → 05 → 06 → 07 → 08`, followed by `09 → 10` for the remaining figures.
-
----
-
-## Method summary
-
-- **Predictor (transferability).** A macro-structural similarity score between the
-  source and each target market, combining a cross-country rank-order component and
-  a cosine-similarity component over open macro indicators. Outcome-linked
-  behavioural indicators are excluded from the predictor to preserve independence.
-- **Outcome (realized divergence).** An information-theoretic divergence between the
-  source behavioural distribution (from source-market credit data) and each target
-  market's observed activity distribution (from demand-side survey microdata).
-- **Absorptive-capacity label.** A bank-sector efficiency sub-index from a
-  prior-literature financial-development index, independent of the transferability
-  axis and used only for the two-dimensional decision framework.
-- **Decision framework.** A four-quadrant grid over transferability and absorptive
-  capacity, extending the original one-dimensional transfer tier.
+1. Obtain the raw datasets and place them under `data/` (see `data/README.txt`).
+2. From `notebooks/`, run `01 → 02 → 03 → 04 → 05 → 06` in order.
+   `02` requires network access to the World Bank API; the rest run offline once the
+   inputs are present.
+3. Tables appear in `results/tables/`, figures in `results/figures/`.
 
 ---
 
 ## License
 
-Code in this repository is released for review purposes. A license will be attached
-on de-anonymized release. Primary datasets remain under their respective providers'
-licenses and are not redistributed here.
+Code is released for review and reproduction. Primary datasets remain under their
+respective providers' licenses and are not redistributed here.
